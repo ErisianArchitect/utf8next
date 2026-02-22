@@ -172,7 +172,7 @@ impl fmt::Display for NonEmptyStr {
 
 /// Returns the next character in the string with the length of the character in bytes.
 /// 
-/// This version of the function uses `inline(always)` and uses a Marker type to help
+/// This version of the function uses `inline(always)` to help
 /// with inlining.
 #[must_use]
 #[inline(always)]
