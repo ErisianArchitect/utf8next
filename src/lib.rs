@@ -3,6 +3,20 @@ use std::{borrow, marker::PhantomData, ops, slice};
 
 
 /// A [str] wrapper type that enforces that a string must be non-empty.
+/// 
+/// # Usage
+/// 
+/// ```rust, ignore
+/// let some_string = "hello, world"
+/// // ...
+/// if let Some(non_empty) = NonEmptyStr::new(some_string) {
+///     let (chr, len) = next_char_with_len(non_empty);
+///     assert_eq!(chr, 'h');
+///     assert_eq!(len, 1);
+/// } else {
+///     panic!("String was empty.");
+/// }
+/// ```
 #[repr(transparent)]
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NonEmptyStr {
@@ -41,36 +55,42 @@ impl NonEmptyStr {
         &self.s
     }
     
+    /// See [str::len].
     #[must_use]
     #[inline(always)]
     pub const fn len(&self) -> usize {
         self.s.len()
     }
     
+    /// See [str::is_char_boundary].
     #[must_use]
     #[inline(always)]
     pub const fn is_char_boundary(&self, index: usize) -> bool {
         self.s.is_char_boundary(index)
     }
     
+    /// See [str::floor_char_boundary].
     #[must_use]
     #[inline(always)]
     pub const fn floor_char_boundary(&self, index: usize) -> usize {
         self.s.floor_char_boundary(index)
     }
     
+    /// See [str::ceil_char_boundary].
     #[must_use]
     #[inline(always)]
     pub const fn ceil_char_boundary(&self, index: usize) -> usize {
         self.s.ceil_char_boundary(index)
     }
     
+    /// See [str::as_bytes].
     #[must_use]
     #[inline(always)]
     pub const fn as_bytes(&self) -> &[u8] {
         self.s.as_bytes()
     }
     
+    /// See [str::as_ptr].
     #[must_use]
     #[inline(always)]
     pub const fn as_ptr(&self) -> *const u8 {
@@ -98,6 +118,7 @@ impl NonEmptyStr {
         unsafe { NonEmptyStr::new_unchecked(slice) }
     }
     
+    /// See [str::is_ascii].
     #[must_use]
     #[inline(always)]
     pub const fn is_ascii(&self) -> bool {
@@ -109,6 +130,7 @@ impl<I: slice::SliceIndex<str, Output = str>> ops::Index<I> for &NonEmptyStr
 where
     str: ops::Index<I, Output = str> {
     type Output = NonEmptyStr;
+    #[inline]
     fn index(&self, index: I) -> &Self::Output {
         let slice = &self.s[index];
         assert!(!slice.is_empty(), "Slice must be non-empty.");
@@ -155,6 +177,7 @@ impl fmt::Display for NonEmptyStr {
 #[must_use]
 #[inline(always)]
 pub const fn next_char_with_len_inline<Marker>(s: &NonEmptyStr) -> (char, usize) {
+    // Without using the Marker type, the compiler might not perform monomorphization.
     let _ = const { ::std::hint::black_box(PhantomData::<Marker>) };
     // These constants are just meant to help make the match expression below more readable.
     /// Leading ones count for a codepoint that has a length of 1.
@@ -226,10 +249,39 @@ pub const fn next_char_with_len_inline<Marker>(s: &NonEmptyStr) -> (char, usize)
     }
 }
 
+/// Used to call the inlinable `next_char_with_len` function with a fresh marker type.
+/// 
+/// This macro can be used to strongly suggest inlining.
+/// 
+/// # Usage
+/// 
+/// ```rust, ignore
+/// pub const fn next_char_with_len(s: &NonEmptyStr) -> (char, usize) {
+///     next_char_with_len_inline!(s)
+/// }
+/// ```
+/// Alternatively, you can also give the marker a name for debug purposes:
+/// ```rust, ignore
+/// pub const fn next_char_with_len(s: &NonEmptyStr) -> (char, usize) {
+///     next_char_with_len_inline!(NextCharWithLenMarker: s)
+/// }
+/// ```
+#[macro_export]
+macro_rules! next_char_with_len_inline {
+    ($s:expr) => {
+        $crate::next_char_with_len_inline!(__MacroMarker: $s)
+    };
+    ($marker_name:ident : $s:expr) => {
+        {
+            struct $marker_name;
+            $crate::next_char_with_len_inline::<$marker_name>($s)
+        }
+    };
+}
+
 /// Returns the next character in the string with the length of the character in bytes.
 pub const fn next_char_with_len(s: &NonEmptyStr) -> (char, usize) {
-    struct NextCharWithLenMarker;
-    next_char_with_len_inline::<NextCharWithLenMarker>(s)
+    next_char_with_len_inline!(CrateNextCharWithLen: s)
 }
 
 #[cfg(test)]
