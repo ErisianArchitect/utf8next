@@ -178,7 +178,7 @@ impl fmt::Display for NonEmptyStr {
 #[inline(always)]
 pub const fn next_char_with_len_inline<Marker>(s: &NonEmptyStr) -> (char, usize) {
     // Without using the Marker type, the compiler might not perform monomorphization.
-    let _ = const { ::std::hint::black_box(PhantomData::<Marker>) };
+    let _ = ::std::hint::black_box(PhantomData::<Marker>);
     // These constants are just meant to help make the match expression below more readable.
     /// Leading ones count for a codepoint that has a length of 1.
     const LEN1: u32 = 0;
