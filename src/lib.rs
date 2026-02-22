@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{borrow, ops, slice};
+use std::{borrow, marker::PhantomData, ops, slice};
 
 
 /// A [str] wrapper type that enforces that a string must be non-empty.
@@ -155,6 +155,7 @@ impl fmt::Display for NonEmptyStr {
 #[must_use]
 #[inline(always)]
 pub const fn next_char_with_len_inline<Marker>(s: &NonEmptyStr) -> (char, usize) {
+    let _ = const { ::std::hint::black_box(PhantomData::<Marker>) };
     // These constants are just meant to help make the match expression below more readable.
     /// Leading ones count for a codepoint that has a length of 1.
     const LEN1: u32 = 0;
