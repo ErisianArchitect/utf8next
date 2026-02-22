@@ -42,6 +42,42 @@ impl NonEmptyStr {
     }
     
     #[must_use]
+    #[inline(always)]
+    pub const fn len(&self) -> usize {
+        self.s.len()
+    }
+    
+    #[must_use]
+    #[inline(always)]
+    pub const fn is_char_boundary(&self, index: usize) -> bool {
+        self.s.is_char_boundary(index)
+    }
+    
+    #[must_use]
+    #[inline(always)]
+    pub const fn floor_char_boundary(&self, index: usize) -> usize {
+        self.s.floor_char_boundary(index)
+    }
+    
+    #[must_use]
+    #[inline(always)]
+    pub const fn ceil_char_boundary(&self, index: usize) -> usize {
+        self.s.ceil_char_boundary(index)
+    }
+    
+    #[must_use]
+    #[inline(always)]
+    pub const fn as_bytes(&self) -> &[u8] {
+        self.s.as_bytes()
+    }
+    
+    #[must_use]
+    #[inline(always)]
+    pub const fn as_ptr(&self) -> *const u8 {
+        self.s.as_ptr()
+    }
+    
+    #[must_use]
     #[inline]
     pub fn get<I: slice::SliceIndex<str, Output = str>>(&self, index: I) -> Option<&Self> {
         let slice = &self.s[index];
@@ -60,6 +96,12 @@ impl NonEmptyStr {
         debug_assert!(!slice.is_empty());
         // SAFETY: The slice should have already been determined to be non-empty.
         unsafe { NonEmptyStr::new_unchecked(slice) }
+    }
+    
+    #[must_use]
+    #[inline(always)]
+    pub const fn is_ascii(&self) -> bool {
+        self.s.is_ascii()
     }
 }
 
@@ -93,19 +135,26 @@ impl borrow::Borrow<str> for NonEmptyStr {
 
 impl ops::Deref for NonEmptyStr {
     type Target = str;
+    #[inline]
     fn deref(&self) -> &Self::Target {
         &self.s
     }
 }
 
 impl fmt::Display for NonEmptyStr {
+    #[inline]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.as_str())
     }
 }
 
 /// Returns the next character in the string with the length of the character in bytes.
-pub const fn next_char_with_len(s: &NonEmptyStr) -> (char, usize) {
+/// 
+/// This version of the function uses `inline(always)` and uses a Marker type to help
+/// with inlining.
+#[must_use]
+#[inline(always)]
+pub const fn next_char_with_len_inline<Marker>(s: &NonEmptyStr) -> (char, usize) {
     // These constants are just meant to help make the match expression below more readable.
     /// Leading ones count for a codepoint that has a length of 1.
     const LEN1: u32 = 0;
@@ -174,6 +223,12 @@ pub const fn next_char_with_len(s: &NonEmptyStr) -> (char, usize) {
         // SAFETY: It's UB for a string slice to contain invalid utf-8.
         _ => unsafe { ::std::hint::unreachable_unchecked() },
     }
+}
+
+/// Returns the next character in the string with the length of the character in bytes.
+pub const fn next_char_with_len(s: &NonEmptyStr) -> (char, usize) {
+    struct NextCharWithLenMarker;
+    next_char_with_len_inline::<NextCharWithLenMarker>(s)
 }
 
 #[cfg(test)]
