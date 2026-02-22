@@ -1,9 +1,10 @@
 [package]
 name = "utf8next"
+authors = ["ErisianArchitect <https://github.com/ErisianArchitect>"]
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/ErisianArchitect/utf8next"
 description = "A simple function for getting the next character and its length in bytes from a string."
 license-file = "LICENSE"
 readme = "README.md"
-
-[dependencies]
+documentation = "https://docs.rs/utf8next"
