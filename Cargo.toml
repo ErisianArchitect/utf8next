@@ -1,0 +1,9 @@
+[package]
+name = "utf8next"
+version = "0.1.0"
+edition = "2024"
+description = "A simple function for getting the next character and its length in bytes from a string."
+license-file = "LICENSE"
+readme = "README.md"
+
+[dependencies]
