@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{borrow, marker::PhantomData, ops, slice};
+use std::{borrow, ops, slice};
 
 
 /// A [str] wrapper type that enforces that a string must be non-empty.
@@ -176,9 +176,7 @@ impl fmt::Display for NonEmptyStr {
 /// with inlining.
 #[must_use]
 #[inline(always)]
-pub const fn next_char_with_len_inline<Marker>(s: &NonEmptyStr) -> (char, usize) {
-    // Without using the Marker type, the compiler might not perform monomorphization.
-    let _ = ::std::hint::black_box(PhantomData::<Marker>);
+pub const fn next_char_with_len_inline(s: &NonEmptyStr) -> (char, usize) {
     // These constants are just meant to help make the match expression below more readable.
     /// Leading ones count for a codepoint that has a length of 1.
     const LEN1: u32 = 0;
@@ -249,39 +247,10 @@ pub const fn next_char_with_len_inline<Marker>(s: &NonEmptyStr) -> (char, usize)
     }
 }
 
-/// Used to call the inlinable `next_char_with_len` function with a fresh marker type.
-/// 
-/// This macro can be used to strongly suggest inlining.
-/// 
-/// # Usage
-/// 
-/// ```rust, ignore
-/// pub const fn next_char_with_len(s: &NonEmptyStr) -> (char, usize) {
-///     next_char_with_len_inline!(s)
-/// }
-/// ```
-/// Alternatively, you can also give the marker a name for debug purposes:
-/// ```rust, ignore
-/// pub const fn next_char_with_len(s: &NonEmptyStr) -> (char, usize) {
-///     next_char_with_len_inline!(NextCharWithLenMarker: s)
-/// }
-/// ```
-#[macro_export]
-macro_rules! next_char_with_len_inline {
-    ($s:expr) => {
-        $crate::next_char_with_len_inline!(__MacroMarker: $s)
-    };
-    ($marker_name:ident : $s:expr) => {
-        {
-            struct $marker_name;
-            $crate::next_char_with_len_inline::<$marker_name>($s)
-        }
-    };
-}
-
 /// Returns the next character in the string with the length of the character in bytes.
+#[must_use]
 pub const fn next_char_with_len(s: &NonEmptyStr) -> (char, usize) {
-    next_char_with_len_inline!(CrateNextCharWithLen: s)
+    next_char_with_len_inline(s)
 }
 
 #[cfg(test)]
