@@ -258,11 +258,11 @@ mod tests {
     use super::*;
     #[test]
     fn non_empty_test() {
-        if let Some(non_empty) = NonEmptyStr::new("hello, world") {
+        if let Some(non_empty) = NonEmptyStr::new("¢") {
             let (chr, len) = next_char_with_len(non_empty);
-            assert_eq!(non_empty.as_str(), "hello, world");
-            assert_eq!(chr, 'h');
-            assert_eq!(len, 1);
+            assert_eq!(non_empty.as_str(), "¢");
+            assert_eq!(chr, '¢');
+            assert_eq!(len, 2);
         } else {
             panic!("Failure.")
         }
