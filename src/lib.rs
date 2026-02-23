@@ -253,6 +253,11 @@ pub const fn next_char_with_len(s: &NonEmptyStr) -> (char, usize) {
     next_char_with_len_inline(s)
 }
 
+#[must_use]
+pub const fn next_char(s: &NonEmptyStr) -> char {
+    next_char_with_len_inline(s).0
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
