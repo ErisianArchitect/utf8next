@@ -1,7 +1,7 @@
 [package]
 name = "utf8next"
 authors = ["ErisianArchitect <https://github.com/ErisianArchitect>"]
-version = "1.0.0-prelease"
+version = "1.0.0-prerelease"
 edition = "2024"
 repository = "https://github.com/ErisianArchitect/utf8next"
 description = "A simple function for getting the next character and its length in bytes from a string."
