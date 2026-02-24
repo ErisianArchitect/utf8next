@@ -8,3 +8,7 @@ description = "A simple function for getting the next character and its length i
 license-file = "LICENSE"
 readme = "README.md"
 documentation = "https://docs.rs/utf8next"
+# Version is unchanged from previous release. Do not set to `publish = true` until
+# the new version release, at which point the version should be bumped.
+publish = false
+
